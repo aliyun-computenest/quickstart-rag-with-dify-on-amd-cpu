@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>Dify RAG 单个云实例部署文档 -- AMD CPU - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#dify-rag-amd-cpu">Dify RAG 单个云实例部署文档 -- AMD CPU</a></li>
+              
+                  <li><a href="#dify">Dify简介</a></li>
+                  
+              
+                  <li><a href="#rag">RAG简介</a></li>
+                  
+              
+                  <li><a href="#_1">计费说明</a></li>
+                  
+              
+                  <li><a href="#ram">RAM账号所需权限</a></li>
+                  
+              
+                  <li><a href="#_2">部署流程</a></li>
+                  
+              
+                  <li><a href="#dify_1">访问 Dify 网页界面</a></li>
+                  
+              
+                  <li><a href="#dify-rag">在 Dify 中搭建 RAG 的分步说明</a></li>
+                  
+                      <li class="li-h3"><a href="#_3">设置模型</a></li>
+                  
+                      <li class="li-h3"><a href="#_4">创建知识库</a></li>
+                  
+                      <li class="li-h3"><a href="#_5">创建聊天工具</a></li>
+                  
+              
+                  <li><a href="#_6">监控工具</a></li>
+                  
+                      <li class="li-h3"><a href="#llm">LLM 日志</a></li>
+                  
+                      <li class="li-h3"><a href="#milvus">Milvus 网页界面</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="dify-rag-amd-cpu">Dify RAG 单个云实例部署文档 -- AMD CPU</h1>
+<h2 id="dify">Dify简介</h2>
+<p><strong>Dify</strong> 是一款开源的 <strong>大型语言模型（LLM）应用开发平台</strong>，旨在帮助用户快速构建、部署和管理基于 AI 的应用程序。它的核心特点包括 <strong>低代码/可视化开发</strong>，用户可以通过拖拽组件的方式设计 AI 工作流，无需深入编码即可创建聊天机器人、文本生成工具或复杂自动化任务。Dify 支持 <strong>多模型集成</strong>，兼容 OpenAI、Anthropic等主流 LLM，并能快速接入新模型，提供灵活的选择。此外，Dify 内置 <strong>RAG（检索增强生成）引擎</strong>，可结合外部知识库提升 AI 回答的准确性，适用于企业知识管理、智能客服等场景。  </p>
+<p>Dify 的 <strong>优点</strong> 在于其 <strong>易用性和高效性</strong>，即使是 <strong>非技术人员</strong> 也能快速上手，同时提供企业级功能如 <strong>权限管理、日志监控和 API 集成</strong>，适合创业团队、企业及个人开发者。它的 <strong>开源特性</strong> 允许私有化部署，确保数据安全，并支持灵活的定制化需求。  </p>
+<p><strong>主要用途</strong> 包括：<br />
+- <strong>智能客服</strong>：构建多轮对话机器人，提升服务效率。<br />
+- <strong>内容生成</strong>：自动撰写文章、翻译或营销文案。<br />
+- <strong>企业知识库</strong>：通过 RAG 技术实现精准问答。<br />
+- <strong>自动化流程</strong>：如数据分析、邮件处理等复杂任务编排。  </p>
+<p>Dify 通过 <strong>一站式解决方案</strong>，大幅降低了 AI 应用的开发门槛，加速从创意到落地的进程。</p>
+<h2 id="rag">RAG简介</h2>
+<p><strong>检索增强生成（RAG, Retrieval-Augmented Generation）</strong> 是一种结合信息检索与大型语言模型（LLM）生成能力的技术，旨在解决传统大模型在专业知识、时效性和数据安全等方面的局限性。由于大模型的训练数据通常存在<strong>知识局限性</strong>（如无法覆盖专业领域或实时信息）和<strong>幻觉问题</strong>（可能生成不准确的回答），RAG通过引入外部知识库，使模型能够动态检索相关数据并生成更准确、可靠的回答。  </p>
+<p><strong>RAG的核心流程</strong> 可分为三个阶段：<br />
+1. <strong>数据准备</strong>：将外部知识（如企业文档、数据库）进行文本分割、向量化（Embedding）并存储至向量数据库（如FAISS、Milvus）。<br />
+2. <strong>检索阶段</strong>：用户提问时，系统将问题转化为向量，从数据库中检索最相关的文本片段。<br />
+3. <strong>生成阶段</strong>：检索到的内容与用户问题结合，通过Prompt工程输入LLM，生成最终答案。  </p>
+<p><strong>RAG的实际应用</strong> 广泛覆盖多个领域：<br />
+- <strong>智能客服</strong>：结合企业知识库提供精准回答，如法律咨询或产品支持。<br />
+- <strong>医疗与金融</strong>：辅助医生检索最新研究，或帮助分析师整合市场数据生成报告。<br />
+- <strong>内容创作</strong>：自动生成基于权威数据的文章或新闻摘要。  </p>
+<p>RAG通过动态结合外部知识，显著提升了AI的可信度与实用性，成为企业部署生成式AI的重要方案。</p>
+<p><img alt="" src="attachment/rag-flow.gif" /></p>
+<h2 id="_1">计费说明</h2>
+<p>该服务在阿里云上的费用主要涉及：</p>
+<ul>
+<li>所选CPU云服务器的规格</li>
+<li>磁盘容量</li>
+<li>公网带宽 计费方式：按量付费（小时）或包年包月 预估费用在创建实例时可实时看到。</li>
+</ul>
+<h2 id="ram">RAM账号所需权限</h2>
+<table>
+<thead>
+<tr>
+<th>权限策略名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>管理云服务器服务（ECS）的权限</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>管理专有网络（VPC）的权限</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>管理资源编排服务（ROS）的权限</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>管理计算巢服务（ComputeNest）的用户侧权限</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">部署流程</h2>
+<ol>
+<li>单击部署链接。根据界面提示实例选择并填写参数，可以看到对应询价明细，确认参数后点击下一步：确认订单。
+<img alt="" src="attachment/config-01.jpg" /></li>
+<li>创建VPC,填写用户名/密码，选择系统盘，确认订单完成后同意服务协议并点击立即创建。
+<img alt="" src="attachment/config-02.jpg" /></li>
+<li>等待部署完成后就可以开始使用服务，进入服务实例详情页，在资源栏中远程连接ECS
+<img alt="" src="attachment/config-03.jpg" />
+<img alt="" src="attachment/config-04.jpg" /></li>
+<li>启动服务
+该部署流程已经预先设置了运行Dify的配置文件，下载了预设的LLM模型，并且提供了本地运行LLM的配置文件。普通用户只需一行命令即可启动所有服务。在终端中，进入<code>workspace/dify/docker</code>目录，运行以下命令。</li>
+</ol>
+<pre><code class="language-bash">./start.sh
+</code></pre>
+<p><img alt="" src="attachment/console-01.png" />
+请确认上面的服务启动正常。</p>
+<p>高级用户可以选择使用自己想要的LLM模型。LLM模型通过llama.cpp运行。用户需要下载模型的GGUF文件到<code>workspace/models</code>目录，然后修改<code>workspace/dify/docker/llm_api/env_setup.sh</code>文件中的模型名字，最后运行启动命令。</p>
+<p>如果需要停止所有的dockers容器，在<code>workspace/dify/docker</code>目录下运行以下命令。</p>
+<pre><code class="language-bash">docker compose down
+</code></pre>
+<h2 id="dify_1">访问 Dify 网页界面</h2>
+<p>启动服务后，通过公网地址使用Dify， http://your-host-IP
+该部署已经预设了管理员用户和密码。使用 demo@gmail.com 登录，密码是 "demo1234!"</p>
+<h2 id="dify-rag">在 Dify 中搭建 RAG 的分步说明</h2>
+<p>该部署已经设置了Dify使用的<strong>Qwen3-30B-A3B</strong>模型作为缺省大模型、创建了用于演示的知识库和聊天流程。用户登录后即可开始对话。</p>
+<p>Qwen3-30B-A3B是Qwen 系列大型语言模型的最新成员之一。小型 MoE 模型 Qwen3-30B-A3B 的激活参数数量是 QwQ-32B 的 10%，准确性更胜一筹,推理速度更快。
+详细的Qwen3模型介绍可以参考<a href="https://qwenlm.github.io/zh/blog/qwen3/">Qwen3</a>
+<img alt="" src="attachment/qwen3.jpg" /></p>
+<p>Qwen3 模型支持两种思考模式：
+* 思考模式：在这种模式下，模型会逐步推理，经过深思熟虑后给出最终答案。这种方法非常适合需要深入思考的复杂问题。
+* 非思考模式：在此模式中，模型提供快速、近乎即时的响应，适用于那些对速度要求高于深度的简单问题。</p>
+<p>如果用户需要重新设置账户以及创建自己的知识库，请按照以下步骤操作。</p>
+<h4 id="_3">设置模型</h4>
+<p>进入 "Settings -&gt; Model Provider"
+<img alt="" src="attachment/80b3fc451fac55353eb3e476e682c051.png" />
+安装 OpenAI-API-compatible 插件
+<img alt="" src="attachment/2c88f2b006c8f7bf63add67f80dfa4f1.png" /></p>
+<p>安装插件后，点击 "Add model"
+对于 LLM，输入模型名称和 API URL。我们从端口 8080 提供模型服务。
+API URL 是 http://host.docker.internal:8080/v1
+<img alt="" src="attachment/941053df721ebb7f0b80e521e449810d.png" />
+同样，设置嵌入和重排序模型。
+对于嵌入模型，API URL 是 http://host.docker.internal:8081/v1
+对于重排序模型，API URL 是 http://host.docker.internal:8082/v1</p>
+<p>设置这些模型后，还要完成系统模型设置，并保存设置。
+<img alt="" src="attachment/f7642bf7f7d51410a5c6d45f972e3ad2.png" /></p>
+<h4 id="_4">创建知识库</h4>
+<p>点击 "Knowledge -&gt; Create Knowledge -&gt; upload file -&gt; Next"，然后选择分块方法、嵌入模型和检索设置。</p>
+<p>下面只是提供一个例子。这些参数需要根据用户自己的文档进行优化。
+<img alt="" src="attachment/b2db12a0ccd658956066c0f7b3af943d.png" />
+<img alt="" src="attachment/40390f708f39c08394186b018ef3ca57.png" />
+在该部署流程中，我们使用 Milvus 作为向量数据库。这里推荐使用混合搜索。</p>
+<h4 id="_5">创建聊天工具</h4>
+<p>点击 "Studio -&gt; Chatflow -&gt; create from blank"，给你的应用一个名称，然后点击 "create"
+这就是一个简单的 RAG聊天机器人。
+<img alt="" src="attachment/2db1f3ad847d3abd263cd8b7629f7e0e.png" /></p>
+<h2 id="_6">监控工具</h2>
+<h4 id="llm">LLM 日志</h4>
+<p>llama.cpp 运行日志位于 <code>volumes/llm_logs</code> 文件夹中。生成模型、嵌入模型和重排序模型分别生成自己的日志。性能指标可以在日志文件中查看。</p>
+<h4 id="milvus">Milvus 网页界面</h4>
+<p>这里的RAG使用Milvus 向量数据库。我们提供了一个网页界面工具来检查 milvus 向量数据库。URL 是 http://your-host-ip:8000。 确保在VM 实例中开放此端口。用户名是 "root"，密码是 "Milvus"。</p>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2025-08-15 08:53:44.978268+00:00
+  -->
+</body>
+</html>
